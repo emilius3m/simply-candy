@@ -118,6 +118,13 @@ class _StatusTabState extends State<StatusTab> {
   bool _stopping = false;
   String? _error;
 
+  @override
+  void initState() {
+    super.initState();
+    // Prova la connessione automatica all'avvio
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
+  }
+
   Future<void> _refresh() async {
     final app = context.read<AppState>();
     setState(() {
