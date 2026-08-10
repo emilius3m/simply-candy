@@ -1,47 +1,47 @@
 # 🫧 Simply Candy
 
-**Controllo locale reverse-engineered e App Multi-piattaforma per Lavatrici Candy BWM 149PH7 (e serie Bianca / simply-Fi)**
+**Reverse-engineered local control system & Multi-platform Flutter App for Candy BWM 149PH7 (and Bianca / simply-Fi series) washing machines.**
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![Flutter 3.12+](https://img.shields.io/badge/flutter-3.12+-02569B.svg)](https://flutter.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.116+-009688.svg)](https://fastapi.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Simply Candy** consente il controllo diretto, la consultazione e il monitoraggio in rete locale (LAN) delle lavatrici Candy della serie Bianca (modello **BWM 149PH7** e compatibili), bypassando l'infrastruttura Cloud durante il normale funzionamento. 
+**Simply Candy** enables direct local network (LAN) control, monitoring, and program selection for Candy Bianca series smart washing machines (specifically model **BWM 149PH7** and compatible variants), bypassing the Candy Cloud infrastructure during daily operation.
 
-Il progetto include sia **strumenti CLI / API in Python** sia una **App nativa in Flutter** (Android, iOS, Windows, macOS, Linux, Web).
+The project provides both a **Python CLI / REST API suite** and a **cross-platform Flutter App** (Android, iOS, Windows, macOS, Linux, Web).
 
 ---
 
 ## 📸 Screenshots & Demo
 
-| Dashboard Flutter App | Interfaccia Web FastAPI |
+| Flutter Mobile / Desktop App | FastAPI Local Web UI |
 | :---: | :---: |
-| ![Flutter App Screenshot](flutter_app/screenshot.png) | *Web UI locale servita su `http://localhost:8000`* |
+| ![Flutter App Screenshot](flutter_app/screenshot.png) | *Local Web UI served at `http://localhost:8000`* |
 
 ---
 
-## 🌟 Caratteristiche Principali
+## 🌟 Key Features
 
-- 🔒 **Comunicazione Locale Cifrata (XOR)**: Parlano direttamente con la lavatrice via HTTP (`http-read.json`, `http-write.json`) in rete locale.
-- 🔑 **Scambio Chiave Automatico**: Derivazione ed estrazione della chiave di cifratura XOR a 16 byte con fallback multi-livello e caching locale (`candy_key.cache`).
-- ☁️ **Importazione Catalogo da Cloud (CIAM OAuth2)**: Flusso di autenticazione sicuro OAuth2 + PKCE verso Salesforce Candy Cloud per scaricare le definizioni ufficiali dei programmi e le maschere delle opzioni (`OptMsk1`, `OptMsk2`).
-- 🛡️ **Fail-Safe & Sicurezza**:
-  - Modalità `--dry-run` attiva di default per prevenire l'avvio accidentale del ciclo durante i test.
-  - Validazione dei parametri (temperatura, centrifuga, grado di sporco, opzioni) rispetto ai range ammessi da ciascun programma.
-  - Scrittura atomica del catalogo `programs.json` con backup di ripristino.
-- 📱 **App Flutter Multi-piattaforma**:
-  - Scansione e scoperta automatica dell'IP della lavatrice sulla sottorete LAN (`/24`).
-  - Grafica CustomPainter con oblò animato, riflessi, livello acqua e cestello rotante.
-  - Display LCD in stile retro per il tempo residuo.
-  - Gestione dei lavaggi Preferiti con nomi personalizzati.
-- 🐍 **Suite Python & API REST**:
-  - CLI per lettura stato, invio comandi e stop ciclo (`candy_sendprogram.py`).
-  - Server web FastAPI integrato (`candy_web.py`) con dashboard responsive.
+- 🔒 **Direct Local HTTP Control**: Communicates directly over WiFi with the washing machine via HTTP (`http-read.json`, `http-write.json`) using 16-byte XOR encrypted payloads.
+- 🔑 **Automatic Key Discovery**: Multi-tier XOR key extraction and derivation with local key caching (`candy_key.cache`).
+- ☁️ **Cloud Catalog Import (CIAM OAuth2)**: Secure OAuth2 + PKCE authentication flow against Candy's Salesforce Cloud to fetch official washing program definitions and option bitmasks (`OptMsk1`, `OptMsk2`).
+- 🛡️ **Safety & Fail-Safe Design**:
+  - `--dry-run` mode enabled by default to prevent accidental physical cycle starts during testing.
+  - Parameter validation (temperature, spin speed, soil level, option masks) enforced against catalog constraints.
+  - Atomic writing for `programs.json` with `.bak` restore fallback.
+- 📱 **Cross-Platform Flutter Application**:
+  - Subnet scanner (`/24`) for automatic local IP discovery.
+  - Custom-painted realistic washer UI with animated rotating drum, glass reflections, and dynamic water level.
+  - Retro neon green LCD display showing remaining cycle time.
+  - Preset manager for favorite custom wash cycles.
+- 🐍 **Python CLI & Web REST API**:
+  - CLI for status reading, program starting, and cycle stopping (`candy_sendprogram.py`).
+  - Single-file FastAPI web server (`candy_web.py`) with responsive HTML dashboard.
 
 ---
 
-## 📐 Architettura del Sistema
+## 📐 System Architecture
 
 ```
                       [ Candy Salesforce Cloud ]
@@ -72,129 +72,126 @@ Il progetto include sia **strumenti CLI / API in Python** sia una **App nativa i
 
 ---
 
-## 🚀 Guida Rapida — Python (CLI & Web UI)
+## 🚀 Quick Start — Python (CLI & Web UI)
 
-### 1. Prerequisiti e Installazione
+### 1. Installation
 
 ```bash
-# Clona il repository
+# Clone the repository
 git clone https://github.com/emilius3m/simply-candy.git
 cd simply-candy
 
-# Crea un ambiente virtuale
+# Create a virtual environment
 python -m venv .venv
 
-# Attiva l'ambiente virtuale
-# Su Windows (PowerShell):
+# Activate the virtual environment
+# Windows (PowerShell):
 .\.venv\Scripts\Activate.ps1
-# Su Linux/macOS:
+# Linux / macOS:
 source .venv/bin/activate
 
-# Installa le dipendenze
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Importazione del Catalogo Programmi dal Cloud
+### 2. Import Program Catalog from Cloud
 
-L'importazione serve solo la prima volta per creare il file `programs.json` personalizzato per il proprio modello:
+Run the import script once to download and normalize the official program catalog for your machine:
 
 ```bash
 python candy_import_programs.py
 ```
 
-> **Flusso di autenticazione sicuro**: Lo script aprirà il browser sulla pagina di login ufficiale Candy (`id.candy-home.com`). Non vengono inserite credenziali nel terminale. Al termine del login, copia l'URL di reindirizzamento `candy://...` e incollalo nel terminale.
+> **Secure OAuth Flow**: The script opens the official Candy login page (`id.candy-home.com`) in your default browser. Your credentials are never entered into the terminal. Once logged in, copy the redirect URL (`candy://...`) and paste it into the terminal prompt.
 
-### 3. Utilizzo della CLI
+### 3. Using the CLI
 
 ```bash
-# Elenca tutti i programmi disponibili nel catalogo
+# List all imported wash programs
 python candy_sendprogram.py list
 
-# Leggi lo stato attuale della lavatrice in rete
+# Read current live machine status over LAN
 python candy_sendprogram.py status --ip 192.168.1.50
 
-# Simula l'avvio di un programma (Dry-Run sicuro)
+# Simulate starting a program (Dry-Run mode, safe for testing)
 python candy_sendprogram.py start --program "Cotone" --temp 60 --spin 1000 --dry-run
 
-# Avvia realmente un programma
+# Start a program for real
 python candy_sendprogram.py start --program "Cotone" --temp 60 --spin 1000 --no-dry-run
 
-# Interrompi il ciclo in corso
+# Stop an active cycle
 python candy_sendprogram.py stop
 ```
 
-### 4. Avvio dell'Interfaccia Web (FastAPI)
+### 4. Running the Local Web UI (FastAPI)
 
 ```bash
 python candy_web.py
 ```
-Apri il browser su `http://localhost:8000` per accedere alla dashboard di controllo.
+Open your browser at `http://localhost:8000` to access the interactive web dashboard.
 
 ---
 
-## 📱 Guida Rapida — App Flutter (`flutter_app/`)
+## 📱 Quick Start — Flutter App (`flutter_app/`)
 
-L'applicazione Flutter si trova nella sottocartella `flutter_app/`.
+The cross-platform Flutter mobile and desktop app is located in the `flutter_app/` directory.
 
-### Esecuzione ed Installazione
+### Build and Run
 
 ```bash
 cd flutter_app
 
-# Ottieni le dipendenze
+# Get Flutter packages
 flutter pub get
 
-# Esegui su Desktop (Windows / macOS / Linux) o Dispositivo / Emulatore (Android / iOS)
+# Run on Desktop (Windows / macOS / Linux) or Device / Emulator (Android / iOS)
 flutter run
 
-# Compila l'APK per Android
+# Build Android APK
 flutter build apk --release
 
-# Compila l'eseguibile per Windows
+# Build Windows Executable
 flutter build windows
 ```
 
-### Funzionalità dell'App
-1. **Stato**: Schermata principale con visualizzazione in tempo reale del pannello lavatrice, spie LED, stato fase, tempo residuo ed il pulsante per **fermare il lavaggio**.
-2. **Avvio**: Catalogo grafico dei programmi con ricerca, personalizzazione parametri (temperatura, centrifuga, livello sporco, opzioni extra) e pulsante **Salva nei Preferiti**.
-3. **Impostazioni**: Ricerca automatica della lavatrice in rete locale (scansione sottorete `/24`), configurazione IP manuale e procedura guidata per l'importazione del catalogo via Cloud.
+### App Features
+1. **Status**: Live monitoring tab displaying the front washer panel, LED indicators, cycle stage, remaining time, and a **Stop Wash** button.
+2. **Start**: Visual program catalog with search, parameter tuning (temperature, spin speed, soil level, extra options), and **Save as Favorite**.
+3. **Settings**: Automatic LAN IP subnet scanner (`/24`), manual IP setup, and step-by-step cloud OAuth catalog import.
 
 ---
 
-## 🔬 Protocollo e Reverse Engineering
+## 🔬 Protocol & Reverse Engineering Details
 
-La lavatrice Candy BWM 149PH7 comunica via HTTP non autenticato ma cifrato mediante un algoritmo **XOR a chiave fissa (16 byte)**.
+The Candy BWM 149PH7 washing machine communicates using unauthenticated, XOR-encrypted HTTP requests with a 16-byte fixed key.
 
-- **Payload di lettura**: `GET http://<ip>/http-read.json?encrypted=1`
-- **Payload di scrittura**: `GET http://<ip>/http-write.json?encrypted=1&data=<hex>`
-- **Formato comando (18 parametri)**: 
+- **Read Status**: `GET http://<ip>/http-read.json?encrypted=1`
+- **Write Command**: `GET http://<ip>/http-write.json?encrypted=1&data=<hex>`
+- **18-Parameter Command Format**:  
   `Write=1&StSt=1&DelVl=0&PrNm=...&PrCode=...&PrStr=...&TmpTgt=...&SLevTgt=...&SpdTgt=...&OptMsk1=...&OptMsk2=...&Lang=1&Stm=...&Dry=...&ED=0&RecipeId=0&StartCheckUp=0&DispTestOn=1`
 
-Per approfondire i dettagli tecnici del reverse engineering, della decompilazione dell'APK Android Candy e delle maschere delle opzioni, consulta la documentazione in [`docs/articles/candy-bwm-149ph7-medium-it.md`](docs/articles/candy-bwm-149ph7-medium-it.md).
+For full reverse-engineering notes, Android APK decompilation details, and option mask specifications, see [`docs/articles/candy-bwm-149ph7-medium-it.md`](docs/articles/candy-bwm-149ph7-medium-it.md).
 
 ---
 
 ## 🧪 Testing
 
-Il progetto include una suite di test completa con `pytest`:
+Run the `pytest` suite to verify program parsing, payload building, OAuth flow, and API endpoints:
 
 ```bash
-# Installa le dipendenze dev
 pip install -r requirements-dev.txt
-
-# Esegui i test
 pytest
 ```
 
 ---
 
-## 🔒 Dati da Proteggere
+## 🔒 Security & Sensitive Data
 
-- `candy_key.cache`: Contiene la chiave di cifratura locale estipolata dall'elettrodomestico.
-- `candy://` callback URL: Contiene token temporanei durante la procedura di login OAuth2. **Non condividere mai questi file o URL in issue o forum pubblici.**
+- `candy_key.cache`: Contains the local device XOR key derived from your machine.
+- `candy://` callback URL: Contains temporary tokens generated during OAuth login. **Do not share these tokens or cache files in public GitHub issues.**
 
 ---
 
-## 📄 Licenza
+## 📄 License
 
-Questo progetto è distribuito sotto licenza **MIT**. Consulta il file `LICENSE` per ulteriori informazioni.
+Distributed under the **MIT License**. See `LICENSE` for more information.
