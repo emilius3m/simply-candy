@@ -117,16 +117,37 @@ class _StatusTabState extends State<StatusTab> {
   bool _loading = false;
   bool _stopping = false;
   String? _error;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
-    // Prova la connessione automatica all'avvio
-    WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refresh();
+      _startPolling();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPolling() {
+    _pollingTimer?.cancel();
+    // Interval: 5s while running, 12s when idle/offline
+    final interval = _running ? const Duration(seconds: 5) : const Duration(seconds: 12);
+    _pollingTimer = Timer.periodic(interval, (_) {
+      if (mounted && !_loading && !_stopping) {
+        _refresh();
+      }
+    });
   }
 
   Future<void> _refresh() async {
     final app = context.read<AppState>();
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -137,12 +158,19 @@ class _StatusTabState extends State<StatusTab> {
       await app.setCachedKey(key);
       final client = CandyLocalClient(dio: dio);
       final s = await client.readStatus(app.candyIp, key);
+      if (!mounted) return;
+      final wasRunning = _running;
       setState(() {
         _status = s;
         _online = true;
         _loading = false;
       });
+      // Adjust polling frequency if running status changed
+      if (wasRunning != _running) {
+        _startPolling();
+      }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _online = false;
         _loading = false;
