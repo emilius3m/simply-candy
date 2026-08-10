@@ -1,0 +1,22 @@
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+candy_key.cache
+programs.json
+programs.json.bak
+programs.json.tmp
+.programs.json.*.tmp
+
+# Flutter
+flutter_app/build/
+flutter_app/.dart_tool/
+flutter_app/.idea/
+
+# Test snapshots
+.pytest-*/
+.playwright-mcp/
+
+# Tools
+.superpowers/
+.zcode/

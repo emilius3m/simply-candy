@@ -1,0 +1,32 @@
+[
+  {
+    "appliance": {
+      "id": "fake-device-1234",
+      "appliance_model": "BWM 149PH7/1-S",
+      "appliance_type": "WM",
+      "connectivity": "wifi",
+      "interface_type": "Bianca",
+      "programs": [
+        {
+          "program": {
+            "id": "101",
+            "position": 99,
+            "name": "DUAL_WM_WD_PROGRAM_NAME_COTONE",
+            "command_parameters": [
+              {"command_parameter": {"name": "selector_position", "validation": "1"}},
+              {"command_parameter": {"name": "pr_code", "validation": "7"}},
+              {"command_parameter": {"name": "default_temperature", "validation": "40"}},
+              {"command_parameter": {"name": "maximum_temperature", "validation": "90"}},
+              {"command_parameter": {"name": "default_spin_speed", "validation": "1000"}},
+              {"command_parameter": {"name": "maximum_spin_speed", "validation": "1400"}},
+              {"command_parameter": {"name": "minimum_soil_level", "validation": "1"}},
+              {"command_parameter": {"name": "default_soil_level", "validation": "2"}},
+              {"command_parameter": {"name": "maximum_soil_level", "validation": "3"}},
+              {"command_parameter": {"name": "available_options", "validation": "0"}}
+            ]
+          }
+        }
+      ]
+    }
+  }
+]
